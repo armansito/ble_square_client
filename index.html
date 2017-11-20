@@ -3,18 +3,36 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    html, body, {
-      position:fixed;
-      top:0;
-      bottom:0;
-      left:0;
-      right:0;
+    body {
+      margin: 5%;
+    }
+    button {
+      background-color: #42A5F5;
+      border: none;
+      color: white;
+      padding: 12px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+    #status-div {
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+    }
+    input[type=color] {
+      height: 40px;
+    }
+    button {
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <div id='status-div'>Start</div>
-  <a href="#" onclick="run();">Scan</a>
+  <div id='status-div'>Status: Start</div>
+  <button onclick="run();">Scan</button>
 
   <p>Color</p>
   <input id="color-input" type="color" name="favcolor" value="#00ff00">
