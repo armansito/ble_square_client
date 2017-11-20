@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+</head>
+<body>
+  <div id='status-div'>Start</div>
+  <a href="#" onclick="run();">Scan</a>
+
+  <p>Color</p>
+  <input id="color-input" type="color" name="favcolor" value="#00ff00">
+
+  <p>Scale</p>
+  <input id="scale-input" type="range" min="1" max="255" value="100">
+
+  <p>Rotate</p>
+  <input id="rotate-input" type="range" min="0" max="360" value="0">
+
+  <script>
+    function run() {
+      navigator.bluetooth.requestDevice({
+        filters: [{
+          services: ['548c2932-f58c-4c0b-9a4d-92110695a591']
+        }],
+        optionalServices: ['battery_service']
+      })
+      .then(device => {
+        // Human-readable name of the device.
+        console.log(device.name);
+
+        document.getElementById('status-div').innerHTML =
+          'Found: ' + device.name;
+
+        // Attempts to connect to remote GATT Server.
+        return device.gatt.connect();
+      })
+      .then(server => {
+        document.getElementById('status-div').innerHTML =
+          'Connected: ' + server.device.name;
+
+        return server.getPrimaryService('548c2932-f58c-4c0b-9a4d-92110695a591');
+      })
+      .then(service => {
+        console.log('Found demo service');
+
+        // Color characteristic
+        service.getCharacteristic('2bf96f76-f872-422e-8dbd-d2b425850d91')
+          .then(colorChrc => {
+            console.log('Found color characteristic');
+            document.getElementById('color-input').oninput = function() {
+              var valueString = document.getElementById('color-input').value;
+              var value = new Uint8Array(3);
+              value[0] = parseInt(valueString.substr(1,2),16);
+              value[1] = parseInt(valueString.substr(3,2),16);
+              value[2] = parseInt(valueString.substr(5,2),16);
+              colorChrc.writeValue(value).catch(error => {
+                console.log(error);
+              });
+            };
+          })
+          .catch(error => {
+            console.log(error);
+            document.getElementById('status-div').innerHTML = error;
+          });
+
+        // Scale characteristic
+        service.getCharacteristic('4939518b-b222-404d-90b5-7f675f13f27f')
+          .then(scaleChrc => {
+            console.log('Found scale characteristic');
+            document.getElementById('scale-input').oninput = function() {
+              var value = Uint8Array.of(document.getElementById('scale-input').value);
+              scaleChrc.writeValue(value).catch(error => {
+                console.log(error);
+              });
+            };
+          })
+          .catch(error => {
+            console.log(error);
+            document.getElementById('status-div').innerHTML = error;
+          });
+
+        // Rotate characteristic
+        service.getCharacteristic('f1121828-32b3-4675-a46e-db826531c348')
+          .then(rotateChrc => {
+            console.log('Found rotate characteristic');
+            document.getElementById('rotate-input').oninput = function() {
+              var angle = document.getElementById('rotate-input').value;
+              var value = new Uint8Array(2);
+              value[0] = angle;
+              value[1] = angle >>> 8;
+              rotateChrc.writeValue(value).catch(error => {
+                console.log(error);
+              });
+            };
+          })
+          .catch(error => {
+            console.log(error);
+            document.getElementById('status-div').innerHTML = error;
+          });
+      })
+      .catch(error => {
+        console.log(error);
+        document.getElementById('status-div').innerHTML = error;
+      });
+    }
+  </script>
+</body>
+</html>
