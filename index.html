@@ -47,7 +47,7 @@
   </style>
 </head>
 <body>
-  <div id='status-div'>Status: Start</div>
+  <div id='status-div'>Not connected</div>
   <button onclick="run();">Scan</button>
 
   <p>Color</p>
@@ -73,6 +73,10 @@
 
         document.getElementById('status-div').innerHTML =
           'Found: ' + device.name;
+
+        device.addEventListener('gattserverdisconnected', function() {
+          document.getElementById('status-div').innerHTML = 'Not connected';
+        });
 
         // Attempts to connect to remote GATT Server.
         return device.gatt.connect();
